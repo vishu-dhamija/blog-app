@@ -1,47 +1,67 @@
-// app/page.tsx
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import PostList from "../components/PostList";
-import { fetchPosts, createPost, deletePost } from "../services/api";
-import { Post } from "../types/types";
-import Link from "next/link";
-import PostForm from "../components/PostForm";
+import React, { useEffect, useState } from 'react';
 
-const PostsPage = () => {
+import { fetchPosts, createPost, deletePost } from './services/api'; // Corrected import path
+import PostForm from './components/PostForm'; // Corrected import path
+import PostList from './components/PostList'; // Corrected import path
+import { Post } from './types/types'; // Corrected import path
+
+const HomePage = () => {
   const [posts, setPosts] = useState<Post[]>([]);
-
-  // Fetch posts when the component mounts
+  const [loading, setLoading] = useState(true);
+  const [newPostLoading, setNewPostLoading] = useState(false);
+  
+  // Fetch posts on page load
   useEffect(() => {
     const loadPosts = async () => {
-      const response = await fetchPosts();
-      setPosts(response);
+      const data = await fetchPosts();
+      setPosts(data);
+      setLoading(false);
     };
+
     loadPosts();
   }, []);
 
-  const handleDelete = async (id: number) => {
-    await deletePost(id);
-    setPosts(posts.filter((post) => post.id !== id));
+  const handleCreatePost = async (newPost: { title: string; body: string }) => {
+    setNewPostLoading(true);
+    try {
+      const createdPost = await createPost(newPost);
+      setPosts((prevPosts) => [createdPost, ...prevPosts]); // Add the new post to the list
+      alert('Post created successfully!');
+    } catch (error) {
+      console.error('Error creating post:', error);
+      alert('Error creating post.');
+    } finally {
+      setNewPostLoading(false);
+    }
   };
 
-  const handlePostCreated = async (newPost: { title: string; body: string }) => {
-    const createdPost = await createPost(newPost);
-    setPosts((prevPosts) => [createdPost, ...prevPosts]);
+  const handleDeletePost = async (id: number) => {
+    try {
+      await deletePost(id);
+      setPosts((prevPosts) => prevPosts.filter((post) => post.id !== id)); // Remove the post from the list
+      alert('Post deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      alert('Error deleting post.');
+    }
   };
+
+  if (loading) return <p>Loading posts...</p>;
 
   return (
     <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Blog Posts</h1>
-        <Link href="/posts/new" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-          Add New Post
-        </Link>
-      </div>
-      <PostForm onSubmit={handlePostCreated} />
-      <PostList posts={posts} onDelete={handleDelete} />
+      <h1 className="text-3xl font-bold mb-6">Blog Manager</h1>
+
+      {/* Form for creating a new post */}
+      <PostForm onSubmit={handleCreatePost} loading={newPostLoading} />
+
+      {/* List of all posts */}
+      <PostList posts={posts} onDelete={handleDeletePost} />
+
     </div>
   );
 };
 
-export default PostsPage;
+export default HomePage;
