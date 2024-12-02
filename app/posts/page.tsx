@@ -23,7 +23,7 @@ const PostsPage = () => {
 
   return (
     <div className="container bg-slate-400 mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Blog Manager</h1>
+      <h1 className="text-3xl font-bold mb-6">Blog App</h1>
       <PostList posts={posts} onDelete={handleDeletePost} />
     </div>
   );

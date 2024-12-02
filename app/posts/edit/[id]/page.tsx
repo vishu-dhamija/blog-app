@@ -2,31 +2,51 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { fetchPostById, updatePost } from '../../../services/api'; // Corrected import path
-import PostForm from '../../../components/PostForm'; // Corrected import path
-import { Post } from '../../../types/types'; // Corrected import path
+import { fetchPostById, updatePost } from '../../../services/api'; // Adjusted import paths
+import PostForm from '../../../components/PostForm'; // Adjusted import paths
+import { Post } from '../../../types/types'; // Adjusted import paths
 
-const EditPostPage = ({ params }: { params: { id: string } }) => {
+const EditPostPage = ({ params }: { params: Promise<{ id: string }> }) => {
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [postId, setPostId] = useState<number | null>(null);
   const router = useRouter();
 
+  // Resolve `params` asynchronously
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params;
+      setPostId(Number(resolvedParams.id));
+    };
+    resolveParams();
+  }, [params]);
+
+  // Load the post once `postId` is available
   useEffect(() => {
     const loadPost = async () => {
-      const postData = await fetchPostById(Number(params.id));
-      setPost(postData);
-      setLoading(false);
+      if (postId) {
+        try {
+          const postData = await fetchPostById(postId);
+          setPost(postData);
+        } catch (error) {
+          console.error('Error fetching post:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
     };
     loadPost();
-  }, [params.id]);
+  }, [postId]);
 
   const handleUpdatePost = async (data: { title: string; body: string }) => {
+    if (!postId) return;
+
     setSaving(true);
     try {
-      await updatePost(Number(params.id), data);
+      await updatePost(postId, data);
       alert('Post updated successfully!');
-      router.push(`/posts/${params.id}`); // Navigate to post details
+      router.push(`/posts/${postId}`); // Navigate to post details
     } catch (error) {
       console.error('Error updating post:', error);
       alert('Error updating post.');

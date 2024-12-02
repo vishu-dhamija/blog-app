@@ -16,10 +16,15 @@ const PostList: React.FC<PostListProps> = ({ posts, onDelete }) => {
           <h3 className="text-lg font-bold">{post.title}</h3>
           <p>{post.body.slice(0, 100)}...</p>
           <div className="flex space-x-2 mt-2">
-            <a href={`/posts/${post.id}`} className="text-blue-500">View More</a>
+            <a
+              href={`/posts/${post.id}`}
+              className="text-blue-500 underline hover:text-blue-700 transition"
+            >
+              View More
+            </a>
             <button
               onClick={() => onDelete(post.id)}
-              className="text-red-500"
+              className="px-4 py-2 bg-red-500 text-white font-medium rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 transition"
             >
               Delete
             </button>

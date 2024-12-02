@@ -83,7 +83,7 @@ const PostForm: React.FC<PostFormProps> = ({ onSubmit, initialData = { title: ''
       </div>
 
       <div>
-        <label htmlFor="body" className="block text-sm font-medium text-gray-700">Body</label>
+        <label htmlFor="body" className="block text-sm font-medium text-gray-700">Message</label>
         <textarea
           id="body"
           value={body}
